@@ -1,0 +1,41 @@
+﻿@model List<Blog.ViewModels.PostDetailViewModel>
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<br />
+<div class="row" id="content">
+    <div class="box-list">
+        @foreach (var post in Model)
+        {
+            <div class="box-item">
+                <div class="news-box">
+                    @{ 
+                        var url = "/Home/Details/" + post.PostId;
+                    }
+                    <a href="@url">
+                        @{ 
+                            var imgPath = "/images/" + post.ImageUniqueName;
+                        }
+                        <div class="news-img">
+                            <img src=@imgPath />
+                        </div>
+                        <div class="news-title">
+
+                            @if (post.Title.Length > 30)
+                            {
+                                var title = post.Title.Substring(0, 30) + "...";
+                                <h5>@title</h5>
+                            }
+                            else
+                            {
+                                <h5>@post.Title</h5>
+                            }
+                        </div>
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+
+</div>

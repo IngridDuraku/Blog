@@ -1,0 +1,86 @@
+﻿@model Blog.ViewModels.PostDetailViewModel
+@{
+    ViewData["Title"] = "Details";
+}
+
+<br />
+<div class="row">
+    <div class="col-md-1"></div>
+    <div class="col-md-10 curved">
+        <h5 class="text-center">@Model.Title</h5>
+        <div class="center">
+            @{
+                var imgSrc = "/images/" + Model.ImageUniqueName;
+                <img src=@imgSrc class="postImg center" alt="@Model.ImageName" />
+            }
+        </div>
+        <br />
+        <p>
+            @Model.Content
+        </p>
+        <br />
+        @foreach (var comment in Model.Comments)
+        {
+            <div class="comment">
+                <p><b>@comment.Username</b></p>
+                <p>@comment.Text</p>
+            </div>
+        }
+
+        @if (ViewBag.Username != null)
+        {
+            <div class="form-group comment">
+                <p><b>@ViewBag.Username</b></p>
+                <form>
+                    <textarea class="form-control" id="comment" oninput="clearErrorMsg()"></textarea>
+                    <span class="text-danger small" name="error" id="error"></span>
+                    <div>
+                        <input type="button" class="btn btn-dark" value="Posto" style="margin-top: 3px;" placeholder="Koment..." onclick="submitComment()" />
+
+                    </div>
+                    <input type="hidden" value="@Model.PostId" id="postID" />
+                </form>
+            </div>
+        }
+        else
+        {
+            <div>
+                <br />
+                <p><b><em>Regjistrohuni për të lënë komentin tuaj!<a href="/Login/Index">Hyr</a></em></b></p>
+            </div>
+        }
+
+    </div>
+</div>
+<script>
+    function submitComment() {
+        var text = document.getElementById("comment").value;
+        console.log(text);
+        if (text.trim() === "") {
+            document.getElementById("error").innerText = "Ju lutem plotësoni komentin!";
+            return;
+        }
+
+        var postId = document.getElementById("postID").value;
+        var formdata = new FormData();
+        formdata.append("Text", text);
+        formdata.append("PostId", postId);
+        $.ajax({
+            url: "/Home/Comment",
+            type: "POST",
+            data: formdata,
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function (response) {
+                window.location.href = "/Home/Details/" + postId;
+            }
+        });
+    }
+
+
+</script>
+
+
+
+

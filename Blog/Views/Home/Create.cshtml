@@ -1,0 +1,215 @@
+﻿@model Blog.ViewModels.PostViewModel
+
+@{
+    ViewData["Title"] = "Create";
+}
+<style>
+    #categoryDropdown{
+        margin-left:20px;
+        
+    }
+
+    .right{
+        float:right;
+    }
+</style>
+<br />
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6 curved">
+        <h4 class="text-center">Postim i ri</h4>
+        <form asp-action="Create" method="post" enctype="multipart/form-data">
+            <div class="text-danger small" id="errSummary" name="error"></div>
+            <div class="form-group">
+                <label asp-for="Title" class="control-label"></label>
+                <input asp-for="Title" class="form-control" maxlength="300" id="title" oninput="clearErrorMsg()" />
+                <span asp-validation-for="Title" class="text-danger small" id="titleErr" name="error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Content" class="control-label"></label>
+                <textarea asp-for="Content" class="form-control" maxlength="30000" id="textContent"  oninput="clearErrorMsg()" ></textarea>
+                <span asp-validation-for="Content" class="text-danger small" id="contentErr" name="error"></span>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="Image" class="control-label"></label>
+                <input type="file" asp-for="Image" id="uploadInput" style="display:none;" onchange="clearErrorMsg();upadateImage(this);" accept="image/gif, image/jpeg, image/png" />
+                <div>
+                    <img class="figure-img" src="~/images/img.png" alt="Image" id="postPic" style="width:150px; height:150px;margin-left:auto;margin-right:auto;border-radius:7px;">
+                    <button type="button" class="btn btn-link" id="btnSelect">Ngarko</button>
+                </div>
+                <span asp-validation-for="Image" class="text-danger small" id="imageErr" name="error"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="CategoryID" class="control-label"></label>
+                <div class="row">
+                    @Html.DropDownListFor(model => model.CategoryID, new SelectList(Model.Categories, "CategoryID", "Name"), "--Zgjidhni--", new { @class = "col-md-10 form-control dropdownList", id = "categoryDropdown" })
+                    <button class="btn btn-dark " style="margin-left:10px;" onclick="clearErrorMsg();addCategory();" type="button">+</button>
+                </div>
+                <span asp-validation-for="CategoryID" class="text-danger small" id="categoryErr" name="error"></span>
+
+                <br />
+                <table class="table" id="categoryTable" style="visibility:hidden;">
+                    <thead>
+                        <tr>
+                            <th>Nr.</th>
+                            <th>Kategoria</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                    </tbody>
+                </table>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Ruaj" class="btn btn-success center" onclick="submitPost(event);" />
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    <script>
+        $("#btnSelect").click(function () {
+            var $input = $('#uploadInput');
+            $input.trigger('click');
+        });
+
+        function upadateImage(input) {
+            if (input.files && input.files[0]) {
+                if (input.files[0].size > 20971520) {
+                    document.getElementById("imageErr").innerText = "Madhësia e imazhit duhet të jetë më pak se 20MB.";
+                    input.value = "";
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#postPic').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function checkImage() {
+            var upload = document.getElementById("uploadInput");
+            if (upload.files.length == 0) {
+               
+                document.getElementById("imageErr").innerText = "Ju lutem ngarkoni imazhin!";
+                return false;
+            }
+            return true;
+        }
+        var categories = [];
+        var count = 0;
+
+        function addCategory() {
+            var selectList = document.getElementById("categoryDropdown");
+            console.log(selectList.selectedIndex);
+            if (selectList.selectedIndex === 0) {
+                document.getElementById("categoryErr").innerText = "Ju lutem zgjidhni kategorinë !";
+                return;
+            }
+
+            var categoryId = $('#categoryDropdown').find(":selected").val();
+            var categoryName = $('#categoryDropdown').find(":selected").text();
+
+            if (categories.some(category => category.id == categoryId)) {
+                document.getElementById("categoryErr").innerText = "Ju e keni zgjedhur këtë kategori!";
+                return;
+            }
+            if (count == 0) {
+                $("#categoryTable").css('visibility', 'visible');
+            }
+            categories.push({ id: categoryId, name: categoryName });
+            var tbody = $('#tbody').append('<tr><td>' + categories.length + '</td>' +
+                '<td>' + categoryName + '</td>' + 
+                '<td> ' +
+                '<button class="btn btn-default right" onclick="remove(' + count + ')">' +
+                '<span class="material-icons right">' +
+                    'close' +
+                '</span>' +
+                '</button>' +
+                '</td>' + 
+                '</tr> ');
+            count++;
+        }
+
+        function remove(index) {
+            categories.splice(index, 1);
+            console.log(categories);
+            var tbody = $('#tbody').html('');
+            count = 0;
+            for (var i = 0; i < categories.length; i++) {
+                $('#tbody').append('<tr><td>' + (count + 1) + '</td>' +
+                    '<td>' + categories[i].name + '</td>' +
+                    '<td> ' +
+                    '<button type="button" class="btn btn-default right" onclick="remove(' + i + ')">' +
+                    '<span class="material-icons right">' +
+                    'close' +
+                    '</span>' +
+                    '</button>' +
+                    '</td>' +
+                    '</tr> ');
+                count++;
+            }
+
+            if (count == 0) {
+                $("#categoryTable").css('visibility', 'hidden');
+            }
+        }
+
+        function submitPost(e) {
+            e.preventDefault();
+            var title = document.getElementById("title").value;
+            var content = document.getElementById("textContent").value;
+            var img = document.getElementById('uploadInput').files[0];
+
+            if (title.trim() === "") {
+                document.getElementById("titleErr").innerText = "Ju lutem plotësoni titullin!";
+                return;
+            }
+
+            if (content.trim() === "") {
+                console.log(content);
+                document.getElementById("contentErr").innerText = "Ju lutem plotësoni përmbajtjen!";
+                return;
+            }
+
+            if (!checkImage())
+                return;
+
+            if (categories.length == 0) {
+                document.getElementById("categoryErr").innerText = "Ju lutem zgjidhni të paktën një kategori!";
+                return;
+            }
+
+            var formdata = new FormData();
+            formdata.append('Title', title);
+            formdata.append('Content', content);
+            formdata.append('Image', img);
+            for (var i = 0; i < categories.length; i++) {
+                formdata.append('CategoryID', categories[i].id);
+            }
+
+            $.ajax({
+                url: "/Home/Create",
+                type: "POST",
+                data: formdata,
+                processData: false,
+                contentType: false,
+                cache: false,
+                success: function (response) {
+                    if (response.success === false) {
+                        document.getElementById("errSummary").innerText = response.message;
+                    }
+                    else {
+                        window.location.href = "/Home/Index/";
+
+                    }
+                }
+            });
+        }
+    </script>
+}

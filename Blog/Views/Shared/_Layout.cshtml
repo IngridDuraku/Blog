@@ -1,0 +1,89 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Blog</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    <link rel="stylesheet" href="~/fonts/material-icons.css" />
+</head>
+<body class="background">
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-dark primary-color" style="background: rgba(0,0,0,0.7) ">
+
+            <!-- Navbar brand -->
+            <a class="navbar-brand" href="#">Bitblog</a>
+
+            <!-- Collapse button -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#basicExampleNav"
+                    aria-controls="basicExampleNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <!-- Collapsible content -->
+            <div class="collapse navbar-collapse" id="basicExampleNav">
+
+                <!-- Links -->
+                <ul class="navbar-nav mr-auto active">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/Home/Index">Kryefaqja</a>
+                    </li>
+                    <!-- Dropdown -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
+                           aria-haspopup="true" aria-expanded="false" style="cursor:pointer">Kategoritë</a>
+                        <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
+                            @foreach (var category in ViewBag.Categories)
+                            {
+                                 
+                                    var hrefString = "/Home/Index/" + category.CategoryID;
+                                
+                                <a class="dropdown-item" href="@hrefString">@category.Name</a>
+                            }
+                        </div>
+                    </li>
+                    @if (ViewBag.Username == null)
+                    {
+                        <li class="nav-item">
+                            <a class="btn btn-menu" href="/Login/Index">Hyr</a>
+                        </li>
+                    }
+                    else 
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
+                               aria-haspopup="true" aria-expanded="false" style="cursor:pointer">@ViewBag.Username</a>
+                            <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="/Home/Create">Postim i ri</a>
+                                <a class="dropdown-item" href="/Login/LogOut">Dil</a>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <!-- Links -->
+
+                <form class="form-inline" action="/Home/Search">
+                    <div class="md-form">
+                        <input class="form-control mr-sm-2" type="text" placeholder="Kërko" aria-label="Kërko" name="title">
+                        <input type="submit" class="btn btn-menu" value="Kërko" />
+                    </div>
+                </form>
+            </div>
+            <!-- Collapsible content -->
+
+        </nav>
+        <!--/.Navbar-->
+    </header>
+    <div class="container">
+        <main role="main" class="pb-3">
+            @RenderBody()
+        </main>
+    </div>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>
